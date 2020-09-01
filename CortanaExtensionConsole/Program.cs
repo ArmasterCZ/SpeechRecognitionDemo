@@ -11,7 +11,9 @@ namespace CortanaExtensionConsole
         static void Main(string[] args)
         {
             Console.WriteLine("Started");
-            
+
+            //there should be demo.. but isn't
+
             Console.WriteLine("Waiting.");
             Console.ReadLine();
         }
