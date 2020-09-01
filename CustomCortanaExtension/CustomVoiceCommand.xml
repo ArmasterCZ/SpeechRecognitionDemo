@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<VoiceCommands xmlns="http://schemas.microsoft.com/voicecommands/1.2">
+  <CommandSet xml:lang="en-GB" Name="CustomCommandSet">
+    <CommandPrefix> Listen Up </CommandPrefix>
+    <Example> Do it, Open File, Open Website </Example>
+
+    <Command Name="ST_CheckCode">
+      <Example> do it </Example>
+      <ListenFor> do it </ListenFor>
+      <Feedback> I could, if you would programmed it. But you didn't, so i cannot. </Feedback>
+      <Navigate/>
+    </Command>
+    
+    <Command Name="OpenWebsite">
+      <Example> Open website </Example>
+      <ListenFor> Open website </ListenFor>
+      <Feedback> Opening your website </Feedback>
+      <Navigate/>
+    </Command>
+
+    <Command Name="PushIt">
+      <Example> PushIt </Example>
+      <ListenFor> Send Push </ListenFor>
+      <Feedback> Sending Pushover notification </Feedback>
+      <Navigate/>
+    </Command>
+
+    <Command Name="OpenFile">
+      <Example> Open file </Example>
+      <ListenFor> Open file </ListenFor>
+      <Feedback> Opening your file </Feedback>
+      <Navigate/>
+    </Command>
+
+    <Command Name="CreateFile">
+      <Example> Create file </Example>
+      <ListenFor> Create file </ListenFor>
+      <Feedback> Creating your file </Feedback>
+      <Navigate/>
+    </Command>
+
+    <Command Name="SendSerialData">
+      <Example> Send serial data </Example>
+      <ListenFor> Send serial data </ListenFor>
+      <Feedback> Sending serial data </Feedback>
+      <Navigate/>
+    </Command>
+
+  </CommandSet>
+
+</VoiceCommands>
