@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Speech.Recognition;
 using System.Speech.Synthesis;
+using System.Threading.Tasks;
 
 namespace SpeechRecognitionConsole
 {
@@ -10,15 +12,18 @@ namespace SpeechRecognitionConsole
         Choices choices = new Choices();
         SpeechSynthesizer synthesizer = new SpeechSynthesizer();
 
-        Dictionary<string, string> textCommands = new Dictionary<string, string>()
+        Dictionary<string, SpeechModel> textCommands = new Dictionary<string, SpeechModel>()
         {
-            { "How it ostside?", "You can look from the window. Righ?" },
-            { "Can you check my code?", "I could, if you would programmed it. But you didn't, so i cannot." },
-            { "Can you help me?", "With what? Like wtf men, how can i know what you need to help with." },
-            { "How are you today.", "Im fine. Thanks. And you? Wait. I don't care. And nobody likes you." },
-            { "Any motivation?", "Lift your lazy ass and start do something. Something like exercising." }
+            { "How it ostside?", new SpeechModel() { OutputSentence = "You can look from the window. Righ?", OutputReaction = "RunWeatherForecast"} },
+            { "Can you check my code?", new SpeechModel() { OutputSentence = "I could, if you would programmed it. But you didn't, so i cannot.", OutputReaction = "TestProcess" } },
+            { "Can you help me?", new SpeechModel() { OutputSentence = "With what? Like wtf men, how can i know what you need to help with." } },
+            { "How are you today.", new SpeechModel() { OutputSentence = "Im fine. Thanks. And you? Wait. I don't care. And nobody likes you."} },
+            { "Any motivation?", new SpeechModel() { OutputSentence =  "Lift your lazy ass and start do something. Something like exercising."} }
         };
 
+        /// <summary>
+        /// register sententes
+        /// </summary>
         public void Start()
         {
             List<string> commands = new List<string>();
@@ -36,18 +41,85 @@ namespace SpeechRecognitionConsole
             srEngine.RecognizeAsync(RecognizeMode.Multiple);
         }
 
-        private void RecognizedVoice(object sender, SpeechRecognizedEventArgs e)
+        /// <summary>
+        /// react on specific command
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void RecognizedVoice(object sender, SpeechRecognizedEventArgs e)
         {
-            foreach (var item in textCommands)
+            var operation = CheckAllAnswers();
+            var reactionDone = operation.Result;
+            if (reactionDone)
             {
-                if (item.Key.Equals(e.Result.Text))
+                Console.WriteLine("Response done.");
+            }
+        }
+
+        private async Task<bool> CheckAllAnswers()
+        {
+            bool answerFound = false;
+
+            //check all values
+            foreach (KeyValuePair<string, SpeechModel> response in textCommands)
+            {
+                if (response.Key.Equals(e.Result.Text))
                 {
-                    synthesizer.Speak(item.Value);
+                    answerFound = true;
+
+                    //voice response
+                    string responseSentence = response.Value.OutputSentence;
+                    if (!string.IsNullOrEmpty(responseSentence))
+                    {
+                        synthesizer.Speak(responseSentence);
+
+                        RunProcesses(response.Value);
+                    }
+
+                    //run proces response
+                    string responseProcess = response.Value.OutputReaction;
+                    if (!string.IsNullOrEmpty(responseProcess))
+                    {
+                        RunProcesses(response.Value);
+                    }
                     break;
                 }
             }
+
+            return answerFound;
+        } 
+
+        private void RunProcesses(SpeechModel data)
+        {
+            switch (data.OutputReaction)
+            {
+                case "RunWeatherForecast":
+                    Console.WriteLine("Starting weather forecast" + e.Result.Text);
+                    //synthesizer.Speak("Im fine thank you.");
+                    break;
+                //case "Can I change you?":
+                //    Console.WriteLine(e.Result.Text);
+                //    synthesizer.Speak("You are not allowed to do that");
+                //    break;
+                case "TestProcess":
+                    Console.WriteLine("Strating test process.");
+                    break;
+                default:
+                    Console.WriteLine("Unknown command.");
+                    break;
+            }
         }
     }
+	
+	class SpeechModel
+	{
+		public string OutputSentence {get; set;}
+		
+		public string OutputReaction {get; set;}
+		
+	}
+	
+		
 }
 
         //public void Start()
