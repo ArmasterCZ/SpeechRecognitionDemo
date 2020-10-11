@@ -12,11 +12,15 @@ namespace SpeechRecognitionConsole
         Choices choices = new Choices();
         SpeechSynthesizer synthesizer = new SpeechSynthesizer();
 
+        //TODO extract (DB?)
+        /// <summary>
+        /// Hardcodes reactions for voice sentences
+        /// </summary>
         Dictionary<string, SpeechModel> textCommands = new Dictionary<string, SpeechModel>()
         {
-            { "How it ostside?", new SpeechModel() { OutputSentence = "You can look from the window. Righ?", OutputReaction = "RunWeatherForecast"} },
+            { "How it ostside?", new SpeechModel() { OutputSentence = "Look from the window and you will find out.", OutputReaction = "RunWeatherForecast"} },
             { "Can you check my code?", new SpeechModel() { OutputSentence = "I could, if you would programmed it. But you didn't, so i cannot.", OutputReaction = "TestProcess" } },
-            { "Can you help me?", new SpeechModel() { OutputSentence = "With what? Like wtf men, how can i know what you need to help with." } },
+            { "Can you help me?", new SpeechModel() { OutputSentence = "With what? How can i know, what you need to help with." } },
             { "How are you today.", new SpeechModel() { OutputSentence = "Im fine. Thanks. And you? Wait. I don't care. And nobody likes you."} },
             { "Any motivation?", new SpeechModel() { OutputSentence =  "Lift your lazy ass and start do something. Something like exercising."} }
         };
@@ -46,9 +50,9 @@ namespace SpeechRecognitionConsole
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void RecognizedVoice(object sender, SpeechRecognizedEventArgs e)
+        private void RecognizedVoice(object sender, SpeechRecognizedEventArgs e)
         {
-            var operation = CheckAllAnswers();
+            var operation = CheckAllAnswers(e.Result.Text);
             var reactionDone = operation.Result;
             if (reactionDone)
             {
@@ -56,14 +60,19 @@ namespace SpeechRecognitionConsole
             }
         }
 
-        private async Task<bool> CheckAllAnswers()
+        /// <summary>
+        /// check if have answer for specific sentence
+        /// </summary>
+        /// <param name="inputSentence"></param>
+        /// <returns></returns>
+        private async Task<bool> CheckAllAnswers(string inputSentence)
         {
             bool answerFound = false;
 
             //check all values
             foreach (KeyValuePair<string, SpeechModel> response in textCommands)
             {
-                if (response.Key.Equals(e.Result.Text))
+                if (response.Key.Equals(inputSentence))
                 {
                     answerFound = true;
 
@@ -72,15 +81,13 @@ namespace SpeechRecognitionConsole
                     if (!string.IsNullOrEmpty(responseSentence))
                     {
                         synthesizer.Speak(responseSentence);
-
-                        RunProcesses(response.Value);
                     }
 
                     //run proces response
                     string responseProcess = response.Value.OutputReaction;
                     if (!string.IsNullOrEmpty(responseProcess))
                     {
-                        RunProcesses(response.Value);
+                        var processDone = RunProcesses(response.Value, inputSentence).Result;
                     }
                     break;
                 }
@@ -89,12 +96,13 @@ namespace SpeechRecognitionConsole
             return answerFound;
         } 
 
-        private void RunProcesses(SpeechModel data)
+        private async Task<bool> RunProcesses(SpeechModel data, string inputSentence)
         {
+            bool answerFound = true;
             switch (data.OutputReaction)
             {
                 case "RunWeatherForecast":
-                    Console.WriteLine("Starting weather forecast" + e.Result.Text);
+                    Console.WriteLine($"Starting weather forecast {inputSentence}");
                     //synthesizer.Speak("Im fine thank you.");
                     break;
                 //case "Can I change you?":
@@ -105,9 +113,11 @@ namespace SpeechRecognitionConsole
                     Console.WriteLine("Strating test process.");
                     break;
                 default:
+                    answerFound = false;
                     Console.WriteLine("Unknown command.");
                     break;
             }
+            return answerFound;
         }
     }
 	
